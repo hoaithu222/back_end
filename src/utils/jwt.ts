@@ -2,7 +2,7 @@ import * as jwt from 'jsonwebtoken';
 export default class JWT {
   static createAccessToken(payload: object) {
     return jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE || '1h',
+      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE || '24h',
     });
   }
   static createRefreshToken() {

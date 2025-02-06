@@ -1,12 +1,16 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { SocialService } from './social.service';
-import { redis } from 'src/utils/redis';
+
 import JWT from 'src/utils/jwt';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from '../auth.service';
 
 @Controller('auth/social')
 export class SocialController {
-  constructor(private readonly socialService: SocialService) {}
+  constructor(
+    private readonly socialService: SocialService,
+    private readonly authService: AuthService,
+  ) {}
   // Google OAuth
   @Get('google')
   @UseGuards(AuthGuard('google'))
@@ -31,12 +35,12 @@ export class SocialController {
       const refreshToken = JWT.createRefreshToken();
 
       // Lưu refresh token vào Redis
-      const redisStore = await redis;
-      await redisStore.set(
-        `refreshToken_${user.id}`,
-        JSON.stringify({ refreshToken, userId: user.id, email: user.email }),
-      );
-
+      // const redisStore = await redis;
+      // await redisStore.set(
+      //   `refreshToken_${user.id}`,
+      //   JSON.stringify({ refreshToken, userId: user.id, email: user.email }),
+      // );
+      await this.authService.updateUserRefreshToken(user.id, refreshToken);
       // Redirect về frontend với tokens
       const frontendURL = process.env.USER_FRONTEND_URL;
       return res.redirect(
@@ -76,12 +80,12 @@ export class SocialController {
       const refreshToken = JWT.createRefreshToken();
 
       // Lưu refresh token vào Redis
-      const redisStore = await redis;
-      await redisStore.set(
-        `refreshToken_${user.id}`,
-        JSON.stringify({ refreshToken, userId: user.id, email: user.email }),
-      );
-
+      // const redisStore = await redis;
+      // await redisStore.set(
+      //   `refreshToken_${user.id}`,
+      //   JSON.stringify({ refreshToken, userId: user.id, email: user.email }),
+      // );
+      await this.authService.updateUserRefreshToken(user.id, refreshToken);
       // Redirect về frontend với tokens
       const frontendURL = process.env.USER_FRONTEND_URL;
       return res.redirect(
@@ -118,11 +122,12 @@ export class SocialController {
       const refreshToken = JWT.createRefreshToken();
 
       // Lưu refresh token vào Redis
-      const redisStore = await redis;
-      await redisStore.set(
-        `refreshToken_${user.id}`,
-        JSON.stringify({ refreshToken, userId: user.id, email: user.email }),
-      );
+      // const redisStore = await redis;
+      // await redisStore.set(
+      //   `refreshToken_${user.id}`,
+      //   JSON.stringify({ refreshToken, userId: user.id, email: user.email }),
+      // );
+      await this.authService.updateUserRefreshToken(user.id, refreshToken);
 
       // Redirect về frontend với tokens
       const frontendURL = process.env.USER_FRONTEND_URL;

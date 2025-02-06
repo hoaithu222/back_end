@@ -28,6 +28,7 @@ model User {
   updated_at              DateTime           @updatedAt
   verifyEmail             Boolean            @default(false)
   refreshToken            String?
+  refreshTokenExpiry      DateTime?
   verificationToken       String?
   verificationTokenExpiry DateTime?
   verifiedAt              DateTime?
@@ -43,6 +44,15 @@ model User {
   Review                  Review[]
 
   @@map("users")
+}
+
+model BlacklistedToken {
+  id        String   @id @default(uuid())
+  token     String   @unique @db.Text
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("blacklistedToken")
 }
 
 enum Status {

@@ -82,4 +82,57 @@ export class AuthService {
     });
     return userUpdatePassword;
   }
+  async updateUserRefreshToken(userId: number, refreshToken: string | null) {
+    return this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        refreshToken: refreshToken,
+        // Add token expiry time (e.g., 7 days from now)
+        refreshTokenExpiry: refreshToken
+          ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+          : null,
+      },
+    });
+  }
+
+  async getUserByRefreshToken(refreshToken: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        refreshToken: refreshToken,
+        refreshTokenExpiry: {
+          gt: new Date(), // Only valid if expiry is greater than current time
+        },
+      },
+    });
+    return user;
+  }
+
+  async isTokenBlacklisted(token: string) {
+    const blacklistedToken = await this.prisma.blacklistedToken.findFirst({
+      where: {
+        token: token,
+        expiresAt: {
+          gt: new Date(), // Only check non-expired entries
+        },
+      },
+    });
+
+    if (blacklistedToken) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async blacklistToken(token: string) {
+    return this.prisma.blacklistedToken.create({
+      data: {
+        token: token,
+        // Blacklist tokens for 24 hours
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    });
+  }
 }

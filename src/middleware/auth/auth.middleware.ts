@@ -1,7 +1,6 @@
 import { HttpStatus, Injectable, NestMiddleware } from '@nestjs/common';
 import { AuthService } from 'src/modules/auth/auth.service';
 import JWT from 'src/utils/jwt';
-import { redis } from 'src/utils/redis';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
@@ -31,9 +30,8 @@ export class AuthMiddleware implements NestMiddleware {
         });
       }
       // Kiểm tra token có nằm trong blacklist
-      const redisStore = await redis;
-      const isBlackList = await redisStore.get(`blacklist_${token}`);
-      if (isBlackList) {
+      const isBlacklisted = await this.authService.isTokenBlacklisted(token);
+      if (isBlacklisted) {
         return res.status(HttpStatus.UNAUTHORIZED).json({
           success: false,
           error: true,

@@ -12,11 +12,10 @@ import { LoginDto } from './dto/login.dto';
 
 import Hash from 'src/utils/hashing';
 import JWT from 'src/utils/jwt';
-import { redis } from 'src/utils/redis';
-import e, { response, Response } from 'express';
+import { response, Response } from 'express';
 import generatedOtp from 'src/utils/generatedOtp';
 import { SendEmailService } from '../send-email/send-email.service';
-import { error } from 'console';
+
 import resetPasswordWithOtpTemplate from 'src/utils/resetPasswordTemplate';
 
 @Controller('auth')
@@ -29,7 +28,6 @@ export class AuthController {
   @Post('login')
   async login(@Body() { email, password }: LoginDto, @Res() res) {
     try {
-      // Kiểm tra đầu vào
       if (!email || !password) {
         return res.status(HttpStatus.BAD_REQUEST).json({
           message: 'Email và mật khẩu là bắt buộc',
@@ -38,7 +36,6 @@ export class AuthController {
         });
       }
 
-      // Tìm người dùng theo email
       const user = await this.authService.getUserByField('email', email);
       if (!user) {
         return res.status(HttpStatus.UNAUTHORIZED).json({
@@ -48,7 +45,6 @@ export class AuthController {
         });
       }
 
-      // Kiểm tra xác thực email
       if (!user.verifyEmail) {
         return res.status(HttpStatus.FORBIDDEN).json({
           message:
@@ -59,7 +55,6 @@ export class AuthController {
         });
       }
 
-      // Kiểm tra mật khẩu
       const isPasswordValid = Hash.verify(password, user.password);
       if (!isPasswordValid) {
         return res.status(HttpStatus.UNAUTHORIZED).json({
@@ -69,35 +64,15 @@ export class AuthController {
         });
       }
 
-      // Tạo token truy cập và token làm mới
       const accessToken = JWT.createAccessToken({
         userId: user.id,
         email: user.email,
       });
       const refreshToken = JWT.createRefreshToken();
+      const id = user.id;
 
-      // Lưu `refreshToken` vào Redis
-      const redisStore = await redis;
-      const redisKey = `refreshToken_${user.id}`;
-      const redisValue = JSON.stringify({
-        refreshToken,
-        userId: user.id,
-        email: user.email,
-      });
+      await this.authService.updateUserRefreshToken(+id, refreshToken);
 
-      const redisResult = await redisStore.set(redisKey, redisValue, {
-        EX: 60 * 60 * 24 * 7, // Token có hiệu lực trong 7 ngày
-      });
-
-      if (!redisResult) {
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-          message: 'Lỗi hệ thống khi lưu refresh token',
-          success: false,
-          error: true,
-        });
-      }
-
-      // Đăng nhập thành công
       return res.status(HttpStatus.OK).json({
         success: true,
         message: 'Đăng nhập thành công',
@@ -115,10 +90,10 @@ export class AuthController {
       });
     }
   }
+
   @Post('forgot-password')
   async forgotPassword(@Body() { email }: LoginDto, @Res() res) {
     try {
-      // Kiểm tra đầu vào
       if (!email) {
         return res.status(HttpStatus.BAD_REQUEST).json({
           message: 'Email là bắt buộc',
@@ -126,7 +101,7 @@ export class AuthController {
           error: true,
         });
       }
-      // Tìm người dùng theo email
+
       const user = await this.authService.getUserByField('email', email);
       if (!user) {
         return res.status(HttpStatus.UNAUTHORIZED).json({
@@ -251,53 +226,49 @@ export class AuthController {
         error: true,
       });
     }
-    const redisStore = await redis;
-    const keys = await redisStore.keys('refreshToken_*');
-    let userData: any = null;
-    let userKey: string | null = null;
 
-    for (const key of keys) {
-      const value = await redisStore.get(key);
-      const parsedValue = JSON.parse(value);
+    try {
+      // Find user with this refresh token
+      const user = await this.authService.getUserByRefreshToken(refreshToken);
 
-      if (parsedValue.refreshToken === refreshToken) {
-        userData = parsedValue;
-        userKey = key;
-        break;
+      if (!user) {
+        return res.status(HttpStatus.UNAUTHORIZED).json({
+          success: false,
+          error: true,
+          message: 'Refresh Token không hợp lệ hoặc đã hết hạn',
+        });
       }
-    }
-    if (!userData) {
-      return res.status(HttpStatus.UNAUTHORIZED).json({
+
+      // Clear old refresh token
+      await this.authService.updateUserRefreshToken(user.id, null);
+
+      // Create new tokens
+      const newAccessToken = JWT.createAccessToken({
+        userId: user.id,
+        email: user.email,
+      });
+      const newRefreshToken = JWT.createRefreshToken();
+
+      // Save new refresh token
+      await this.authService.updateUserRefreshToken(user.id, newRefreshToken);
+
+      return res.json({
+        success: true,
+        message: 'Refresh Token thành công',
+        data: {
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        },
+      });
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: true,
-        message: 'Refresh Token không hợp lệ hoặc đã hết hạn',
+        message: 'Có lỗi xảy ra khi refresh token',
       });
     }
-    await redisStore.del(userKey);
-    // tạo accessToken mới
-    const newAccessToken = JWT.createAccessToken({
-      userId: userData.userId,
-      email: userData.email,
-    });
-    // Tạo refreshToken mới
-    const newRefreshToken = JWT.createRefreshToken();
-    // Lưu refreshToken mới vào Redis
-    const newRedisKey = `refreshToken_${userData.userId}`;
-    const newRedisValue = JSON.stringify({
-      refreshToken: newRefreshToken,
-      userId: userData.userId,
-      email: userData.email,
-    });
-    await redisStore.set(newRedisKey, newRedisValue, { EX: 60 * 60 * 24 * 7 }); // 7 ngày
-    return res.json({
-      success: true,
-      message: 'Refresh Token thành công ',
-      data: {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-      },
-    });
   }
+
   @Get('profile')
   async profile(@Req() req: any, @Res() res: Response) {
     const user = req.user;
@@ -317,19 +288,19 @@ export class AuthController {
   }
   @Post('logout')
   async logout(@Req() req: any, @Res() res: Response) {
-    const token = req.token;
-    // backlist_accessToken:1
-    if (!token) {
+    const user = req.user;
+
+    if (!user) {
       return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
         error: true,
-        message: 'Token không được để trống',
+        message: 'User không được tìm thấy',
       });
     }
-    const redisStore = await redis;
-    await redisStore.set(`blacklist_${token}`, 1, {
-      EX: 60 * 60 * 24, // Blacklist trong 1 ngày
-    });
+
+    // Clear refresh token in database
+    await this.authService.updateUserRefreshToken(user.id, null);
+
     return res.json({
       success: true,
       message: 'Logout success',
