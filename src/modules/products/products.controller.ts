@@ -167,8 +167,8 @@ export class ProductsController {
     try {
       const { rows, count } =
         await this.productsService.getProductWithSubCategory({
-          page: _page,
-          limit: _limit,
+          page: +_page,
+          limit: +_limit,
           order: _order,
           sort: _sort,
           body,
@@ -179,7 +179,7 @@ export class ProductsController {
         success: true,
         data: rows,
         count: count,
-        currentPage: _page,
+        currentPage: +_page,
       });
     } catch (error) {
       return res.status(HttpStatus.SERVICE_UNAVAILABLE).json({
