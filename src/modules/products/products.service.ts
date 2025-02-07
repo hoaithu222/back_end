@@ -295,4 +295,44 @@ export class ProductsService {
       throw new Error(error.message || 'Lỗi khi lấy sản phẩm của shop');
     }
   }
+  async getProductWithSubCategory({ page, limit, order, sort, body }) {
+    try {
+      const skip = (page - 1) * limit;
+
+      const count = await this.prisma.product.count({
+        where: {
+          subcategory_id: { in: body },
+        },
+      });
+
+      const rows = await this.prisma.product.findMany({
+        skip,
+        take: limit,
+        where: {
+          subcategory_id: { in: body },
+        },
+        include: {
+          product_images: true,
+          product_attributes: true,
+          product_variants: true,
+          shop: true,
+          sub_category: true,
+          Review: true,
+        },
+        orderBy: {
+          [sort]: order,
+        },
+      });
+      rows.forEach((product) => {
+        product.product_variants = product.product_variants.map((variant) => ({
+          ...variant,
+          sku: variant.sku.split('-')[0],
+        }));
+      });
+
+      return { count, rows };
+    } catch (error) {
+      throw new Error(error.message || 'Lỗi khi lấy sản phẩm');
+    }
+  }
 }

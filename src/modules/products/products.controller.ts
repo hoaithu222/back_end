@@ -160,6 +160,35 @@ export class ProductsController {
       });
     }
   }
+  @Post('/sub-category')
+  async getProductWithSubCategory(@Query() query, @Body() body, @Res() res) {
+    const { _page = 1, _limit = 8, _order = 'asc', _sort = 'id' } = query;
+
+    try {
+      const { rows, count } =
+        await this.productsService.getProductWithSubCategory({
+          page: _page,
+          limit: _limit,
+          order: _order,
+          sort: _sort,
+          body,
+        });
+      return res.status(HttpStatus.ACCEPTED).json({
+        message: 'Lấy danh sách sản phẩm thành công',
+        error: false,
+        success: true,
+        data: rows,
+        count: count,
+        currentPage: _page,
+      });
+    } catch (error) {
+      return res.status(HttpStatus.SERVICE_UNAVAILABLE).json({
+        message: error.message || 'Đã xảy ra lỗi',
+        error: true,
+        success: false,
+      });
+    }
+  }
 
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() res) {
