@@ -117,10 +117,28 @@ export class ProductsService {
         },
         include: {
           product_images: true,
-          product_attributes: true,
+          product_attributes: {
+            include: {
+              attribute_value: {
+                include: {
+                  type: {
+                    select: {
+                      id: true,
+                      name: true,
+                      is_multiple: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
           product_variants: true,
           shop: true,
-          sub_category: true,
+          sub_category: {
+            include: {
+              category: true,
+            },
+          },
           Review: true,
         },
       });
@@ -128,18 +146,51 @@ export class ProductsService {
       if (!productId) {
         throw new Error('Lỗi khi lấy dữ liệu từ server');
       }
+
       productId.product_variants = productId.product_variants.map(
         (variant) => ({
           ...variant,
           sku: variant.sku.split('-')[0],
         }),
       );
+
+      const transformedAttributes = productId.product_attributes.map(
+        (attr) => ({
+          product_id: attr.product_id,
+          attribute_value: {
+            id: attr.attribute_value.id,
+            value: attr.attribute_value.value,
+            type: {
+              id: attr.attribute_value.type.id,
+              name: attr.attribute_value.type.name,
+              is_multiple: attr.attribute_value.type.is_multiple,
+            },
+          },
+        }),
+      );
+
+      const groupedAttributes = transformedAttributes.reduce((acc, attr) => {
+        const typeId = attr.attribute_value.type.id;
+        if (!acc[typeId]) {
+          acc[typeId] = {
+            type: attr.attribute_value.type,
+            values: [],
+          };
+        }
+        acc[typeId].values.push({
+          id: attr.attribute_value.id,
+          value: attr.attribute_value.value,
+        });
+        return acc;
+      }, {});
+
+      productId.product_attributes = Object.values(groupedAttributes);
+
       return productId;
     } catch (error) {
       throw new Error(`Đã xảy ra lỗi ${error}`);
     }
   }
-
   async update(id: number, body: UpdateProductDto) {
     try {
       const existingProduct = await this.prisma.product.findUnique({
