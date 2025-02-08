@@ -69,7 +69,11 @@ export class ShopService {
             email: true,
           },
         },
-        products: true,
+        products: {
+          include: {
+            product_images: true,
+          },
+        },
       },
     });
     if (!shopById) {

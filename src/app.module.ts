@@ -120,10 +120,10 @@ export class AppModule {
           path: 'shop',
           method: RequestMethod.GET,
         },
-        {
-          path: 'shop/:id',
-          method: RequestMethod.GET,
-        },
+        // {
+        //   path: 'shop/:id',
+        //   method: RequestMethod.GET,
+        // },
         {
           path: 'shop/:id',
           method: RequestMethod.PATCH,

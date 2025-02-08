@@ -129,15 +129,15 @@ export class ShopController {
 
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() res, @Req() req) {
-    const user = req.user;
+    // const user = req.user;
 
-    if (!(user.role === 'Admin' && user.is_admin)) {
-      return res.status(HttpStatus.UNAUTHORIZED).json({
-        message: 'Bạn không có quyền ',
-        error: true,
-        success: false,
-      });
-    }
+    // if (!(user.role === 'Admin' && user.is_admin)) {
+    //   return res.status(HttpStatus.UNAUTHORIZED).json({
+    //     message: 'Bạn không có quyền ',
+    //     error: true,
+    //     success: false,
+    //   });
+    // }
     const shop = await this.shopService.findOne(+id);
     if (!shop) {
       return res.status(HttpStatus.BAD_REQUEST).json({
