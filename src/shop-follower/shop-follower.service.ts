@@ -17,6 +17,7 @@ export class ShopFollowerService {
     const isUserShop = await this.prisma.shop.findFirst({
       where: {
         user_id: userId,
+        id: body.shop_id,
       },
     });
     if (isUserShop) {
