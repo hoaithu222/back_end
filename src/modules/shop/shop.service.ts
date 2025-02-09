@@ -74,6 +74,11 @@ export class ShopService {
             product_images: true,
           },
         },
+        shop_followers: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
     if (!shopById) {

@@ -17,6 +17,7 @@ export class AuthService {
       },
       include: {
         Shop: true,
+        ShopFollower: true,
       },
     });
   }

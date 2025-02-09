@@ -15,6 +15,7 @@ import { SubCategoryModule } from './modules/sub-category/sub-category.module';
 import { AttributesModule } from './modules/attributes/attributes.module';
 import { ShopModule } from './modules/shop/shop.module';
 import { ProductsModule } from './modules/products/products.module';
+import { ShopFollowerModule } from './shop-follower/shop-follower.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ProductsModule } from './modules/products/products.module';
     AttributesModule,
     ShopModule,
     ProductsModule,
+    ShopFollowerModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, AuthService],
@@ -144,6 +146,15 @@ export class AppModule {
         {
           path: 'products',
           method: RequestMethod.DELETE,
+        },
+        // shop followers
+        {
+          path: 'shop-follower',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'shop-follower/unfollow',
+          method: RequestMethod.POST,
         },
       );
   }
