@@ -233,9 +233,9 @@ export class ProductsService {
             product_attributes: {
               deleteMany: {},
               createMany: {
-                data: body.product_attributes.map((attr) => ({
-                  attribute_value_id: attr.attribute_value_id,
-                })),
+                data: body.product_attributes.filter(
+                  (attr) => attr.attribute_value_id !== undefined,
+                ),
               },
             },
           }),
@@ -277,6 +277,11 @@ export class ProductsService {
         message: 'Cập nhật sản phẩm thành công',
       };
     } catch (error) {
+      console.error('Update error details:', {
+        error: error.message,
+        stack: error.stack,
+        meta: error?.meta,
+      });
       throw new Error(error.message || 'Lỗi khi cập nhật sản phẩm');
     }
   }

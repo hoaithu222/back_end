@@ -15,7 +15,10 @@ import { SubCategoryModule } from './modules/sub-category/sub-category.module';
 import { AttributesModule } from './modules/attributes/attributes.module';
 import { ShopModule } from './modules/shop/shop.module';
 import { ProductsModule } from './modules/products/products.module';
-import { ShopFollowerModule } from './shop-follower/shop-follower.module';
+import { ShopFollowerModule } from './modules/shop-follower/shop-follower.module';
+import { CartModule } from './modules/cart/cart.module';
+import { OrderModule } from './modules/order/order.module';
+import { ReviewModule } from './modules/review/review.module';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import { ShopFollowerModule } from './shop-follower/shop-follower.module';
     ShopModule,
     ProductsModule,
     ShopFollowerModule,
+    CartModule,
+    OrderModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, AuthService],
@@ -155,6 +161,27 @@ export class AppModule {
         {
           path: 'shop-follower/unfollow',
           method: RequestMethod.POST,
+        },
+        // cart
+        {
+          path: 'cart/items',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'cart',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'cart/shop',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'cart/items/:itemId',
+          method: RequestMethod.PATCH,
+        },
+        {
+          path: 'cart/items/:itemId',
+          method: RequestMethod.DELETE,
         },
       );
   }

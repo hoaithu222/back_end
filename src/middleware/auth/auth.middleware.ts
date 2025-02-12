@@ -26,7 +26,7 @@ export class AuthMiddleware implements NestMiddleware {
         return res.status(HttpStatus.UNAUTHORIZED).json({
           success: false,
           error: true,
-          message: 'Unauthorized - Invalid Token',
+          message: 'Bạn vui lòng đăng nhập',
         });
       }
       // Kiểm tra token có nằm trong blacklist
