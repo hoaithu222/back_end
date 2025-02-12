@@ -411,6 +411,7 @@ model OrderHistory {
   @@map("order_history")
 }
 
+// Reviews and Ratings
 model Review {
   id          Int           @id @default(autoincrement())
   user_id     Int
