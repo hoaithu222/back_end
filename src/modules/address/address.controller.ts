@@ -98,7 +98,7 @@ export class AddressController {
       return res.status(HttpStatus.UNAUTHORIZED).json({
         success: false,
         error: true,
-        message: 'User not authenticated',
+        message: 'Vui lòng đăng nhập để tiếp tục',
       });
     }
     const data = await this.addressService.findAll(user.id);

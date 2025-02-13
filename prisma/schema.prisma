@@ -186,6 +186,7 @@ model Product {
   product_variants   ProductVariant[]
   Review             Review[]
   CartItem           CartItem[]
+  OrderItem          OrderItem[]
 
   @@map("products")
 }
@@ -387,15 +388,17 @@ enum OrderStatus {
 }
 
 model OrderItem {
-  id              Int            @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   order_id        Int
-  variant_id      Int
+  variant_id      Int?
+  product_id      Int?
   quantity        Int
   unit_price      Decimal
   subtotal        Decimal
-  created_at      DateTime       @default(now())
-  order           Order          @relation(fields: [order_id], references: [id])
-  product_variant ProductVariant @relation(fields: [variant_id], references: [id])
+  created_at      DateTime        @default(now())
+  order           Order           @relation(fields: [order_id], references: [id])
+  product         Product?        @relation(fields: [product_id], references: [id])
+  product_variant ProductVariant? @relation(fields: [variant_id], references: [id])
 
   @@map("order_items")
 }

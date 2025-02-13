@@ -18,6 +18,10 @@ export class AuthService {
       include: {
         Shop: true,
         ShopFollower: true,
+        user_addresses: true,
+        user_notifications: true,
+        Order: true,
+        Review: true,
       },
     });
   }
