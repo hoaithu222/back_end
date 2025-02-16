@@ -1,15 +1,26 @@
+import { Decimal } from '@prisma/client/runtime/library';
+import { OrderStatus } from '@prisma/client';
+
+class ProductDto {
+  product_id?: number;
+  variant_id?: number;
+  quantity: number;
+  unit_price: Decimal | number;
+  subtotal: Decimal | number;
+}
+
 export class CreateOrderDto {
-  user_id: number;
   shop_id: number;
-  total_amount: number;
-  shipping_fee: number;
+  total_amount: Decimal | number;
+  shipping_fee: Decimal | number;
   address_id: number;
   payment_method: string;
-  variant_id?: number;
-  product_id?: number;
-  quantity?: number;
-  unit_price: number;
-  subtotal: number;
-  cart_id?: number;
-  status: string;
+  status: OrderStatus;
+  products: ProductDto[];
+  tracking_number?: string;
+  courier_name?: string;
+  notes?: string;
+  voucher_id?: number;
+  discount_amount?: Decimal | number;
+  cancellation_reason?: string;
 }

@@ -33,8 +33,16 @@ export class AddressService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} address`;
+  async findOne(id: number) {
+    const address = await this.prisma.userAddress.findFirst({
+      where: {
+        id: id,
+      },
+    });
+    if (!address) {
+      throw new Error('Đã có lỗi xảy ra vui lòng thử lại sau');
+    }
+    return address;
   }
 
   async update(id: number, body: UpdateAddressDto, userId: number) {

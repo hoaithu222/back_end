@@ -118,8 +118,30 @@ export class AddressController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.addressService.findOne(+id);
+  async findOne(@Param('id') id: string, @Res() res, @Req() req) {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(HttpStatus.UNAUTHORIZED).json({
+          message: 'Vui long đăng nhập',
+          error: true,
+          success: false,
+        });
+      }
+      const data = await this.addressService.findOne(+id);
+      return res.status(HttpStatus.ACCEPTED).json({
+        message: `Đã lấy địa chỉ với id ${id} thành công`,
+        error: false,
+        success: true,
+        data: data,
+      });
+    } catch (error) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: error.message || 'Đã có lỗi xảy ra vui lòng thử lại sau',
+        error: true,
+        success: false,
+      });
+    }
   }
 
   @Patch(':id')

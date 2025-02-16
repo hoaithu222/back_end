@@ -19,6 +19,7 @@ import { ShopFollowerModule } from './modules/shop-follower/shop-follower.module
 import { CartModule } from './modules/cart/cart.module';
 import { OrderModule } from './modules/order/order.module';
 import { ReviewModule } from './modules/review/review.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ReviewModule } from './modules/review/review.module';
     CartModule,
     OrderModule,
     ReviewModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, AuthService],
@@ -74,6 +76,10 @@ export class AppModule {
         },
         {
           path: 'address',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'address/:id',
           method: RequestMethod.GET,
         },
         {
@@ -182,6 +188,27 @@ export class AppModule {
         {
           path: 'cart/items/:itemId',
           method: RequestMethod.DELETE,
+        },
+        //order
+        {
+          path: 'order/items',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'order/:id',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'order/:id',
+          method: RequestMethod.PATCH,
+        },
+        {
+          path: 'order/my-order',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'order/shop',
+          method: RequestMethod.POST,
         },
       );
   }

@@ -8,4 +8,5 @@ export class CreateUserDto {
   phone?: string;
   created_at?: Date;
   updated_at?: Date;
+  role?: string;
 }

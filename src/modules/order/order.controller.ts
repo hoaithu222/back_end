@@ -13,6 +13,7 @@ import {
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { error } from 'console';
 
 @Controller('order')
 export class OrderController {
@@ -44,24 +45,128 @@ export class OrderController {
       });
     }
   }
+  @Post('my-order')
+  async findOrderWithUser(@Res() res, @Req() req, @Body() body) {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          message: 'Vui lòng đăng nhập để tiếp tục',
+          error: true,
+          success: false,
+        });
+      }
+      const data = await this.orderService.findOrderWithUser(user.id, body);
+      return res.status(HttpStatus.ACCEPTED).json({
+        message: 'Lấy danh sách đơn hàng thành công',
+        success: true,
+        error: false,
+        data: data,
+      });
+    } catch (error) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: error.message || 'Đã có lỗi xảy ra vui lòng thử lại sau',
+        error: true,
+        success: false,
+      });
+    }
+  }
+  @Post('shop')
+  async findOrderWithShop(@Res() res, @Req() req, @Body() body) {
+    try {
+      const user = req.user;
 
-  @Get()
-  findAll() {
-    return this.orderService.findAll();
+      if (!user) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          message: 'Vui lòng đăng nhập để tiếp tục',
+          error: true,
+          success: false,
+        });
+      }
+      const { data, count } = await this.orderService.findOrderWithShop(
+        user.Shop.id,
+        body,
+      );
+      return res.status(HttpStatus.ACCEPTED).json({
+        message: 'Lấy danh sách đơn hàng thành công',
+        success: true,
+        error: false,
+        data: data,
+        count: count,
+      });
+    } catch (error) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: error.message || 'Đã có lỗi xảy ra vui lòng thử lại sau',
+        error: true,
+        success: false,
+      });
+    }
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(+id);
+  async findOne(@Param('id') id: string, @Res() res, @Req() req) {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          message: 'Vui lòng đăng nhập để tiếp tục',
+          error: true,
+          success: false,
+        });
+      }
+      const orderItem = await this.orderService.findOne(+id);
+      return res.status(HttpStatus.ACCEPTED).json({
+        message: `Lấy order với ID ${id} thành công`,
+        error: false,
+        success: true,
+        data: orderItem,
+      });
+    } catch (error) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: error.message || 'Đã có lỗi xảy ra vui lòng thử lại sau',
+        error: true,
+        success: false,
+      });
+    }
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-  //   return this.orderService.update(+id, updateOrderDto);
-  // }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(+id);
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() body: UpdateOrderDto,
+    @Res() res,
+    @Req() req,
+  ) {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          message: 'Vui lòng đăng nhập để tiếp tục',
+          error: true,
+          success: false,
+        });
+      }
+      console.log(user.role);
+      if (user.role != 'Shop' && user.role != 'Admin') {
+        return res.status(HttpStatus.UNAUTHORIZED).json({
+          message: 'Bạn không có quyền',
+          error: true,
+          success: false,
+        });
+      }
+      const dataUpdate = await this.orderService.update(+id, body, user);
+      return res.status(HttpStatus.ACCEPTED).json({
+        message: 'Đã cập nhật thành công',
+        error: false,
+        success: true,
+        data: dataUpdate,
+      });
+    } catch (error) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: error.message || 'Đã có lỗi xảy ra vui lòng thử lại sau',
+        error: true,
+        success: false,
+      });
+    }
   }
 }
