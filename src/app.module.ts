@@ -210,6 +210,23 @@ export class AppModule {
           path: 'order/shop',
           method: RequestMethod.POST,
         },
+        // review
+        {
+          path: 'review',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'review/:id',
+          method: RequestMethod.PATCH,
+        },
+        {
+          path: 'review/:id',
+          method: RequestMethod.DELETE,
+        },
+        {
+          path: 'review/:id',
+          method: RequestMethod.GET,
+        },
       );
   }
 }

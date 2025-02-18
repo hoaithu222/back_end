@@ -63,7 +63,11 @@ export class ProductsService {
           product_variants: true,
           shop: true,
           sub_category: true,
-          Review: true,
+          Review: {
+            include: {
+              ReviewImage: true,
+            },
+          },
         },
       });
       product.product_variants = product.product_variants.map((variant) => ({
@@ -94,7 +98,11 @@ export class ProductsService {
         product_variants: true,
         shop: true,
         sub_category: true,
-        Review: true,
+        Review: {
+          include: {
+            ReviewImage: true,
+          },
+        },
       },
       orderBy: {
         [sort]: order,
@@ -139,7 +147,11 @@ export class ProductsService {
               category: true,
             },
           },
-          Review: true,
+          Review: {
+            include: {
+              ReviewImage: true,
+            },
+          },
         },
       });
 
@@ -261,7 +273,11 @@ export class ProductsService {
           product_variants: true,
           shop: true,
           sub_category: true,
-          Review: true,
+          Review: {
+            include: {
+              ReviewImage: true,
+            },
+          },
         },
       });
       updatedProduct.product_variants = updatedProduct.product_variants.map(
@@ -373,7 +389,11 @@ export class ProductsService {
           product_variants: true,
           shop: true,
           sub_category: true,
-          Review: true,
+          Review: {
+            include: {
+              ReviewImage: true,
+            },
+          },
         },
         orderBy: {
           [sort]: order,
