@@ -20,6 +20,8 @@ import { CartModule } from './modules/cart/cart.module';
 import { OrderModule } from './modules/order/order.module';
 import { ReviewModule } from './modules/review/review.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
+import { ShopStatisticsModule } from './modules/shop-statistics/shop-statistics.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { PaymentModule } from './modules/payment/payment.module';
     OrderModule,
     ReviewModule,
     PaymentModule,
+    StatisticsModule,
+    ShopStatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, AuthService],
@@ -69,6 +73,10 @@ export class AppModule {
         {
           path: 'users/update/:id',
           method: RequestMethod.PATCH,
+        },
+        {
+          path: 'users',
+          method: RequestMethod.GET,
         },
         {
           path: 'address/create',
@@ -225,6 +233,44 @@ export class AppModule {
         },
         {
           path: 'review/:id',
+          method: RequestMethod.GET,
+        },
+        // static
+        {
+          path: 'statistics',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'statistics/orders',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'statistics/best-selling-products',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'statistics/top-customers',
+          method: RequestMethod.GET,
+        },
+
+        {
+          path: 'statistics/cancelled-orders-rate',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'statistics/revenue-by-month',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'statistics/orders-users-month',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'shop-statistics/:id',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'shop-statistics/revenue-by-month/:id',
           method: RequestMethod.GET,
         },
       );

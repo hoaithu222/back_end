@@ -9,6 +9,7 @@ import {
   HttpStatus,
   Res,
   Query,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -167,8 +168,60 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll(@Query() query, @Res() res, @Req() req) {
+    const user = req.user;
+    if (!user && user.role !== 'Admin') {
+      return res.status(HttpStatus.UNAUTHORIZED).json({
+        message: 'Bạn không có quyền',
+        error: true,
+        success: false,
+      });
+    }
+    const {
+      _page = 1,
+      _limit = 8,
+      _order = 'asc',
+      _sort = 'id',
+      username,
+      q,
+    } = query;
+    const filter = {} as { [key: string]: string | boolean | {} };
+    if (username) {
+      filter.username = username;
+    }
+    if (q) {
+      filter.OR = [
+        {
+          username: {
+            contains: q,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+    try {
+      const { rows, count } = await this.usersService.findAll({
+        page: +_page,
+        limit: +_limit,
+        sort: _sort,
+        order: _order,
+        filter,
+      });
+      return res.status(HttpStatus.ACCEPTED).json({
+        message: 'Đã lấy danh sách thành công',
+        error: false,
+        success: true,
+        count: count,
+        data: rows,
+        current_page: _page,
+      });
+    } catch (error) {
+      return res.status(HttpStatus.SERVICE_UNAVAILABLE).json({
+        message: error.message || 'Đã xảy ra lỗi',
+        error: true,
+        success: false,
+      });
+    }
   }
 
   @Get(':id')

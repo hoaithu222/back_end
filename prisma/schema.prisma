@@ -364,6 +364,7 @@ model Order {
   courier_name        String?
   notes               String?
   voucher_id          Int?
+  is_pay              Boolean        @default(false)
   discount_amount     Decimal?       @default(0)
   cancellation_reason String?
   is_review           Boolean        @default(false)

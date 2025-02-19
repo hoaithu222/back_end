@@ -13,7 +13,6 @@ import {
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { error } from 'console';
 
 @Controller('order')
 export class OrderController {
@@ -56,12 +55,16 @@ export class OrderController {
           success: false,
         });
       }
-      const data = await this.orderService.findOrderWithUser(user.id, body);
+      const { data, statusCounts } = await this.orderService.findOrderWithUser(
+        user.id,
+        body,
+      );
       return res.status(HttpStatus.ACCEPTED).json({
         message: 'Lấy danh sách đơn hàng thành công',
         success: true,
         error: false,
         data: data,
+        statusCounts: statusCounts,
       });
     } catch (error) {
       return res.status(HttpStatus.BAD_REQUEST).json({
@@ -83,16 +86,15 @@ export class OrderController {
           success: false,
         });
       }
-      const { data, count } = await this.orderService.findOrderWithShop(
-        user.Shop.id,
-        body,
-      );
+      const { data, count, statusCounts } =
+        await this.orderService.findOrderWithShop(user.Shop.id, body);
       return res.status(HttpStatus.ACCEPTED).json({
         message: 'Lấy danh sách đơn hàng thành công',
         success: true,
         error: false,
         data: data,
         count: count,
+        statusCounts: statusCounts,
       });
     } catch (error) {
       return res.status(HttpStatus.BAD_REQUEST).json({

@@ -178,6 +178,20 @@ export class OrderService {
   }
   async findOrderWithUser(userId: number, status: OrderStatus[]) {
     try {
+      const statusCounts = await Promise.all(
+        Object.values(OrderStatus).map(async (orderStatus) => {
+          const count = await this.prisma.order.count({
+            where: {
+              user_id: userId,
+              status: orderStatus,
+            },
+          });
+          return {
+            status: orderStatus,
+            count,
+          };
+        }),
+      );
       const data = await this.prisma.order.findMany({
         where: {
           user_id: userId,
@@ -220,7 +234,16 @@ export class OrderService {
       if (!data) {
         throw new Error('đã có lỗi xảy ra vui long thử lại sau');
       }
-      return data;
+      return {
+        data,
+        statusCounts: statusCounts.reduce(
+          (acc, curr) => {
+            acc[curr.status] = curr.count;
+            return acc;
+          },
+          {} as Record<OrderStatus, number>,
+        ),
+      };
     } catch (error) {
       throw new Error(error);
     }
@@ -235,6 +258,20 @@ export class OrderService {
           },
         },
       });
+      const statusCounts = await Promise.all(
+        Object.values(OrderStatus).map(async (orderStatus) => {
+          const count = await this.prisma.order.count({
+            where: {
+              shop_id: shopId,
+              status: orderStatus,
+            },
+          });
+          return {
+            status: orderStatus,
+            count,
+          };
+        }),
+      );
       const data = await this.prisma.order.findMany({
         where: {
           shop_id: shopId,
@@ -278,7 +315,17 @@ export class OrderService {
       if (!data) {
         throw new Error('đã có lỗi xảy ra vui long thử lại sau');
       }
-      return { data, count };
+      return {
+        data,
+        count,
+        statusCounts: statusCounts.reduce(
+          (acc, curr) => {
+            acc[curr.status] = curr.count;
+            return acc;
+          },
+          {} as Record<OrderStatus, number>,
+        ),
+      };
     } catch (error) {
       throw new Error(error);
     }

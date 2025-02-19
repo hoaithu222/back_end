@@ -20,8 +20,18 @@ export class UsersService {
     });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll({ page, limit, sort, order, filter = {} }) {
+    const skip = (page - 1) * limit;
+    const count = await this.prisma.user.count();
+    const rows = await this.prisma.user.findMany({
+      skip: skip,
+      take: limit,
+      where: filter,
+      orderBy: {
+        [sort]: order,
+      },
+    });
+    return { rows, count };
   }
 
   findOne(id: number) {
