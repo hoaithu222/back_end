@@ -148,7 +148,7 @@ export class OrderController {
           success: false,
         });
       }
-      console.log(user.role);
+
       if (user.role != 'Shop' && user.role != 'Admin') {
         return res.status(HttpStatus.UNAUTHORIZED).json({
           message: 'Bạn không có quyền',

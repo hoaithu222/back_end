@@ -52,7 +52,6 @@ export class AuthMiddleware implements NestMiddleware {
       // Gắn thông tin user vào request
       req.user = user;
       req.token = token;
-      console.log('token - role', token, user.role);
 
       next();
     } catch (error) {

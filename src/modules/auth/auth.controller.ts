@@ -279,7 +279,7 @@ export class AuthController {
         success: false,
       });
     }
-    console.log(user.id);
+
     return res.json({
       success: true,
       message: 'Get profile successfully',

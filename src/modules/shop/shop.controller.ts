@@ -162,7 +162,7 @@ export class ShopController {
     @Req() req,
   ) {
     const user = req.user;
-    console.log(user.role);
+
     if (!user || user.role !== 'Shop') {
       return res.status(HttpStatus.UNAUTHORIZED).json({
         message: 'Bạn không có quyền',

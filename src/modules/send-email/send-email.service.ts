@@ -34,7 +34,6 @@ export class SendEmailService {
         html: html,
       });
 
-      console.log('Email sent:', info.messageId);
       return { success: true, data: info };
     } catch (error) {
       console.error('Error occurred while sending email:', error);
