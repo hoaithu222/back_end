@@ -113,6 +113,7 @@ export class ProductsController {
       q,
       shop_id,
       is_active,
+      sales_count,
     } = query;
     const filter = {} as { [key: string]: string | boolean | {} };
     if (filter_name) {
@@ -139,6 +140,9 @@ export class ProductsController {
     }
     if (is_active) {
       filter.is_active = is_active;
+    }
+    if (sales_count) {
+      filter.sales_count = sales_count;
     }
     try {
       const { rows, count } = await this.productsService.findAll({

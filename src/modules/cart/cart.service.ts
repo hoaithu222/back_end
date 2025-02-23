@@ -99,7 +99,6 @@ export class CartService {
   }
   async addToCart(userId: number, item: CreateCartDto) {
     return await this.prisma.$transaction(async (tx) => {
-      // Kiểm tra xem có phải thêm variant hay product
       if (!item.product_id && !item.variant_id) {
         throw new BadRequestException(
           'Vui lòng cung cấp product_id hoặc variant_id',
