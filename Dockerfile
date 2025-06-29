@@ -28,6 +28,6 @@ COPY --from=builder /app/.env ./
 ENV NODE_ENV=production
 RUN npm prune --production
 
-EXPOSE 8082
+EXPOSE 80
 
 CMD ["node", "dist/main"]
