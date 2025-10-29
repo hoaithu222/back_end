@@ -19,6 +19,7 @@ export class UploadService {
           resolve(result);
         },
       );
+      //  comment
 
       const bufferStream = new Stream.PassThrough();
       bufferStream.end(image.buffer);
