@@ -79,6 +79,10 @@ export class AppModule {
           method: RequestMethod.GET,
         },
         {
+          path: 'users/admin/update-role/:id',
+          method: RequestMethod.PATCH,
+        },
+        {
           path: 'address/create',
           method: RequestMethod.POST,
         },

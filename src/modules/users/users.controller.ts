@@ -14,10 +14,13 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  UpdateUserRoleDto,
+  updateUserRoleSchema,
+} from './dto/update-user-role.dto';
 import { z } from 'zod';
 import { SendEmailService } from '../send-email/send-email.service';
 import verifyEmailTemplate from 'src/utils/verifyEmailTemplate';
-import { error } from 'console';
 
 @Controller('users')
 export class UsersController {
@@ -170,7 +173,7 @@ export class UsersController {
   @Get()
   async findAll(@Query() query, @Res() res, @Req() req) {
     const user = req.user;
-    if (!user && user.role !== 'Admin') {
+    if (!user || user.role !== 'Admin') {
       return res.status(HttpStatus.UNAUTHORIZED).json({
         message: 'Bạn không có quyền',
         error: true,
@@ -185,7 +188,7 @@ export class UsersController {
       username,
       q,
     } = query;
-    const filter = {} as { [key: string]: string | boolean | {} };
+    const filter = {} as Record<string, string | boolean | object>;
     if (username) {
       filter.username = username;
     }
@@ -237,5 +240,73 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
+  }
+
+  @Patch('admin/update-role/:id')
+  async updateUserRole(
+    @Param('id') id: string,
+    @Body() body: UpdateUserRoleDto,
+    @Req() req,
+    @Res() res,
+  ) {
+    try {
+      const admin = req.user;
+
+      // Kiểm tra quyền admin
+      if (!admin || admin.role !== 'Admin') {
+        return res.status(HttpStatus.UNAUTHORIZED).json({
+          success: false,
+          error: true,
+          message: 'Bạn không có quyền thực hiện thao tác này',
+        });
+      }
+
+      // Validate dữ liệu
+      const validateFields = await updateUserRoleSchema.safeParseAsync(body);
+      if (!validateFields.success) {
+        const errors = validateFields.error.flatten().fieldErrors;
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          success: false,
+          error: true,
+          errors,
+          message: 'Validation error',
+        });
+      }
+
+      // Kiểm tra không được tự cập nhật role của chính mình
+      if (admin.id === +id) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          success: false,
+          error: true,
+          message: 'Bạn không thể cập nhật role của chính mình',
+        });
+      }
+
+      // Gọi service để update role
+      const result = await this.usersService.updateUserRole(+id, body.role);
+
+      if (!result.success) {
+        return res.status(HttpStatus.BAD_REQUEST).json(result);
+      }
+
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        error: false,
+        message: result.message,
+        data: {
+          id: result.data.id,
+          username: result.data.username,
+          email: result.data.email,
+          role: result.data.role,
+        },
+      });
+    } catch (error) {
+      console.error('Update user role error:', error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: true,
+        message: 'Có lỗi xảy ra khi cập nhật role',
+      });
+    }
   }
 }

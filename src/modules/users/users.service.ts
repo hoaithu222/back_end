@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-// import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.service';
 import Hash from 'src/utils/hashing';
 import { v4 as uuidv4 } from 'uuid';
@@ -178,6 +176,47 @@ export class UsersService {
       return {
         success: false,
         message: 'Không thể gửi lại email xác thực',
+      };
+    }
+  }
+
+  // Admin update role của user khác
+  async updateUserRole(userId: number, role: string) {
+    try {
+      // Kiểm tra user có tồn tại không
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        return {
+          success: false,
+          message: 'Không tìm thấy người dùng',
+        };
+      }
+
+      // Cập nhật role
+      const updatedUser = await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          role: role,
+          updated_at: new Date(),
+          // Nếu set role Admin thì cũng set is_admin = true
+          is_admin: role === 'Admin' ? true : user.is_admin,
+        },
+      });
+
+      return {
+        success: true,
+        message: 'Cập nhật role thành công',
+        data: updatedUser,
+      };
+    } catch (error) {
+      console.error('Update user role error:', error);
+      return {
+        success: false,
+        message: 'Có lỗi xảy ra khi cập nhật role',
+        error: error.message,
       };
     }
   }
